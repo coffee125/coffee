@@ -1,0 +1,247 @@
+
+<style>
+h2.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);color:var(--color-text-primary);}
+.wrap{padding:1rem 0;}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem;align-items:center;}
+.filter-label{font-size:12px;color:var(--color-text-secondary);margin-right:4px;}
+.pill{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s;}
+.pill.active{background:#185FA5;border-color:#185FA5;color:#E6F1FB;}
+.pill:hover:not(.active){background:var(--color-background-secondary);}
+.view-tabs{display:flex;gap:6px;margin-left:auto;}
+.vtab{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;}
+.vtab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.tbl-wrap{overflow-x:auto;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+thead th{padding:8px 10px;text-align:left;font-weight:500;font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--color-text-primary);}
+thead th.sort-asc::after{content:" ↑";}
+thead th.sort-desc::after{content:" ↓";}
+tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--color-background-secondary);}
+td{padding:8px 10px;vertical-align:middle;}
+.ser-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;white-space:nowrap;}
+.s-thor{background:#EEEDFE;color:#3C3489;}
+.s-orin-agx{background:#E1F5EE;color:#085041;}
+.s-orin-nx{background:#E6F1FB;color:#0C447C;}
+.s-orin-nano{background:#EAF3DE;color:#27500A;}
+.s-xavier-agx{background:#FAEEDA;color:#633806;}
+.s-xavier-nx{background:#FAECE7;color:#993C1D;}
+.s-tx2{background:#F1EFE8;color:#444441;}
+.s-nano{background:#FBEAF0;color:#72243E;}
+@media (prefers-color-scheme:dark){
+  .s-thor{background:#26215C;color:#CECBF6;}
+  .s-orin-agx{background:#04342C;color:#9FE1CB;}
+  .s-orin-nx{background:#042C53;color:#B5D4F4;}
+  .s-orin-nano{background:#173404;color:#C0DD97;}
+  .s-xavier-agx{background:#412402;color:#FAC775;}
+  .s-xavier-nx{background:#4A1B0C;color:#F5C4B3;}
+  .s-tx2{background:#2C2C2A;color:#D3D1C7;}
+  .s-nano{background:#4B1528;color:#F4C0D1;}
+}
+.bar-cell{display:flex;align-items:center;gap:6px;}
+.bar-bg{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;min-width:40px;}
+.bar-fill{height:100%;border-radius:3px;background:#185FA5;transition:width .3s;}
+.val{font-weight:500;color:var(--color-text-primary);white-space:nowrap;}
+.pp-good{color:#0F6E56;}
+.pp-mid{color:#BA7517;}
+.pp-low{color:#888780;}
+.temp-tag{font-size:10px;padding:2px 6px;border-radius:8px;background:var(--color-background-secondary);color:var(--color-text-secondary);white-space:nowrap;}
+.temp-ind{background:#FAEEDA;color:#633806;}
+@media (prefers-color-scheme:dark){.temp-ind{background:#412402;color:#FAC775;}}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle;}
+.dot-active{background:#1D9E75;}
+.dot-eol{background:#888780;}
+.chart-section{margin-top:1.5rem;display:none;}
+.chart-section.visible{display:block;}
+.chart-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:12px;}
+.chart-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.chart-label{font-size:11px;color:var(--color-text-secondary);width:130px;flex-shrink:0;text-align:right;}
+.chart-bar{height:18px;border-radius:3px;background:#185FA5;min-width:2px;transition:width .4s;}
+.chart-val{font-size:11px;color:var(--color-text-primary);font-weight:500;white-space:nowrap;}
+.note{font-size:11px;color:var(--color-text-tertiary,var(--color-text-secondary));margin-top:1rem;line-height:1.5;}
+</style>
+<h2 class="sr-only">NVIDIA Jetson series benchmark comparison — AI performance (TOPS), power, operating temperature, price, and price-to-performance across all Jetson modules from Nano to AGX Thor.</h2>
+<div class="wrap">
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <button class="pill active" onclick="setFilter('all',this)">All</button>
+  <button class="pill" onclick="setFilter('active',this)">Active</button>
+  <button class="pill" onclick="setFilter('industrial',this)">Industrial</button>
+  <button class="pill" onclick="setFilter('eol',this)">Legacy/EOL</button>
+  <div class="view-tabs">
+    <button class="vtab active" onclick="setView('table',this)">Table</button>
+    <button class="vtab" onclick="setView('chart',this)">Chart</button>
+  </div>
+</div>
+
+<div id="table-view">
+<div class="tbl-wrap">
+<table id="main-table">
+<colgroup>
+<col style="width:140px"><col style="width:90px"><col style="width:115px"><col style="width:90px"><col style="width:80px"><col style="width:90px"><col style="width:85px"><col style="width:95px">
+</colgroup>
+<thead>
+<tr>
+  <th onclick="sortTable(0)">Module</th>
+  <th onclick="sortTable(1)">Series</th>
+  <th onclick="sortTable(2)">AI Perf (TOPS)</th>
+  <th onclick="sortTable(3)">Power (W)</th>
+  <th onclick="sortTable(4)">Memory</th>
+  <th onclick="sortTable(5)">Oper. Temp.</th>
+  <th onclick="sortTable(6)">Module Price</th>
+  <th onclick="sortTable(7)">TOPS / $100</th>
+</tr>
+</thead>
+<tbody id="tbl-body"></tbody>
+</table>
+</div>
+</div>
+
+<div class="chart-section" id="chart-view">
+  <div class="chart-title">AI performance (TOPS) — log scale</div>
+  <div id="chart-bars"></div>
+  <div style="margin-top:1.5rem;" class="chart-title">Price-to-performance (TOPS per $100 module price)</div>
+  <div id="pp-bars"></div>
+</div>
+
+<p class="note">† TOPS figures: INT8 for Xavier/Orin/Nano series; FP8 for Thor T5000 (1035 TOPS); FP4 for Thor reaches 2070 TFLOPS.<br>
+†† Module prices at 1000-unit quantities (indicative). Dev kit prices are higher. Legacy/EOL modules available via distribution stock.<br>
+††† Standard modules: –25 °C to 80 °C (module operating). Industrial variants extend to –40 °C to 85 °C with ECC, extended shock/vibe ratings.</p>
+</div>
+
+<script>
+const MAX_TOPS = 1035;
+const MAX_PP = 0.60;
+const modules = [
+  {name:"Jetson T5000",series:"AGX Thor",badge:"s-thor",arch:"Blackwell",tops:1035,topslabel:"1035 (FP8) / 2070 FP4",pwr:"40–130",mem:"128 GB",temp:"–25 to 80 °C",tempBadge:"",price:2999,status:"active",industrial:false},
+  {name:"Jetson T4000",series:"AGX Thor",badge:"s-thor",arch:"Blackwell",tops:600,topslabel:"~600 (FP8) / 1200 FP4",pwr:"40–75",mem:"64 GB",temp:"–25 to 80 °C",tempBadge:"",price:1999,status:"active",industrial:false},
+  {name:"AGX Orin 64GB",series:"AGX Orin",badge:"s-orin-agx",arch:"Ampere",tops:275,topslabel:"275",pwr:"15–60",mem:"64 GB",temp:"–25 to 80 °C",tempBadge:"",price:499,status:"active",industrial:false},
+  {name:"AGX Orin 32GB",series:"AGX Orin",badge:"s-orin-agx",arch:"Ampere",tops:200,topslabel:"200",pwr:"15–40",mem:"32 GB",temp:"–25 to 80 °C",tempBadge:"",price:399,status:"active",industrial:false},
+  {name:"AGX Orin Industrial",series:"AGX Orin",badge:"s-orin-agx",arch:"Ampere",tops:248,topslabel:"248",pwr:"15–75",mem:"64 GB + ECC",temp:"–40 to 85 °C",tempBadge:"temp-ind",price:null,status:"active",industrial:true},
+  {name:"Orin NX 16GB",series:"Orin NX",badge:"s-orin-nx",arch:"Ampere",tops:157,topslabel:"157 (Super)",pwr:"10–40",mem:"16 GB",temp:"–25 to 80 °C",tempBadge:"",price:499,status:"active",industrial:false},
+  {name:"Orin NX 8GB",series:"Orin NX",badge:"s-orin-nx",arch:"Ampere",tops:100,topslabel:"100",pwr:"10–25",mem:"8 GB",temp:"–25 to 80 °C",tempBadge:"",price:299,status:"active",industrial:false},
+  {name:"Orin Nano 8GB",series:"Orin Nano",badge:"s-orin-nano",arch:"Ampere",tops:67,topslabel:"67 (Super)",pwr:"7–25",mem:"8 GB",temp:"–25 to 80 °C",tempBadge:"",price:299,status:"active",industrial:false},
+  {name:"Orin Nano 4GB",series:"Orin Nano",badge:"s-orin-nano",arch:"Ampere",tops:40,topslabel:"40",pwr:"5–15",mem:"4 GB",temp:"–25 to 80 °C",tempBadge:"",price:199,status:"active",industrial:false},
+  {name:"AGX Xavier Industrial",series:"AGX Xavier",badge:"s-xavier-agx",arch:"Volta",tops:30,topslabel:"30",pwr:"20–40",mem:"32 GB + ECC",temp:"–40 to 85 °C",tempBadge:"temp-ind",price:null,status:"active",industrial:true},
+  {name:"AGX Xavier 64GB",series:"AGX Xavier",badge:"s-xavier-agx",arch:"Volta",tops:32,topslabel:"32",pwr:"10–30",mem:"64 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"AGX Xavier 32GB",series:"AGX Xavier",badge:"s-xavier-agx",arch:"Volta",tops:32,topslabel:"32",pwr:"10–30",mem:"32 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"Xavier NX 16GB",series:"Xavier NX",badge:"s-xavier-nx",arch:"Volta",tops:21,topslabel:"21",pwr:"10–20",mem:"16 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"Xavier NX 8GB",series:"Xavier NX",badge:"s-xavier-nx",arch:"Volta",tops:21,topslabel:"21",pwr:"10–20",mem:"8 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"TX2",series:"TX2",badge:"s-tx2",arch:"Pascal",tops:4,topslabel:"~4",pwr:"7.5–15",mem:"8 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"TX2i (Industrial)",series:"TX2",badge:"s-tx2",arch:"Pascal",tops:4,topslabel:"~4",pwr:"7.5–15",mem:"8 GB",temp:"–40 to 85 °C",tempBadge:"temp-ind",price:null,status:"eol",industrial:true},
+  {name:"TX2 NX",series:"TX2",badge:"s-tx2",arch:"Pascal",tops:4,topslabel:"~4",pwr:"7.5–15",mem:"4 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"Nano 4GB",series:"Nano",badge:"s-nano",arch:"Maxwell",tops:0.47,topslabel:"0.47",pwr:"5–10",mem:"4 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+  {name:"Nano 2GB",series:"Nano",badge:"s-nano",arch:"Maxwell",tops:0.47,topslabel:"0.47",pwr:"5–10",mem:"2 GB",temp:"–25 to 80 °C",tempBadge:"",price:null,status:"eol",industrial:false},
+];
+let currentFilter = 'all';
+let sortCol = 2, sortDir = -1;
+
+function ppScore(m){
+  if(!m.price) return null;
+  return (m.tops / m.price * 100);
+}
+
+function ppClass(v){
+  if(v===null) return 'pp-low';
+  if(v>=0.40) return 'pp-good';
+  if(v>=0.20) return 'pp-mid';
+  return 'pp-low';
+}
+
+function filteredData(){
+  return modules.filter(m=>{
+    if(currentFilter==='all') return true;
+    if(currentFilter==='active') return m.status==='active';
+    if(currentFilter==='industrial') return m.industrial;
+    if(currentFilter==='eol') return m.status==='eol';
+    return true;
+  });
+}
+
+function sortTable(col){
+  const ths = document.querySelectorAll('thead th');
+  ths.forEach((th,i)=>{th.classList.remove('sort-asc','sort-desc');});
+  if(sortCol===col) sortDir*=-1; else {sortCol=col;sortDir=-1;}
+  ths[col].classList.add(sortDir===-1?'sort-desc':'sort-asc');
+  renderTable();
+}
+
+function renderTable(){
+  const data = filteredData().slice().sort((a,b)=>{
+    const vals = [
+      m=>m.name,
+      m=>m.series,
+      m=>m.tops,
+      m=>parseFloat(m.pwr.split('–')[1]||0),
+      m=>parseInt(m.mem)||0,
+      m=>m.temp,
+      m=>m.price||0,
+      m=>ppScore(m)||0,
+    ];
+    const fn = vals[sortCol]||vals[2];
+    const av=fn(a),bv=fn(b);
+    return av<bv?sortDir:av>bv?-sortDir:0;
+  });
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = data.map(m=>{
+    const pct = Math.min(100, m.tops/MAX_TOPS*100);
+    const pp = ppScore(m);
+    const ppStr = pp!==null ? pp.toFixed(2) : '—';
+    const ppCls = pp!==null ? ppClass(pp) : 'pp-low';
+    const dot = m.status==='active'?'<span class="status-dot dot-active"></span>':'<span class="status-dot dot-eol"></span>';
+    const tempSpan = m.tempBadge
+      ? `<span class="temp-tag ${m.tempBadge}">–40 to 85 °C<br><small>Industrial</small></span>`
+      : `<span class="temp-tag">–25 to 80 °C</span>`;
+    const priceStr = m.price ? `$${m.price.toLocaleString()}` : '—';
+    return `<tr data-tops="${m.tops}">
+      <td style="font-weight:500;font-size:12px;">${dot}${m.name}</td>
+      <td><span class="ser-badge ${m.badge}">${m.series}</span></td>
+      <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="val" style="font-size:11px;">${m.topslabel}</span></div></td>
+      <td style="font-size:11px;color:var(--color-text-secondary);">${m.pwr} W</td>
+      <td style="font-size:11px;">${m.mem}</td>
+      <td>${tempSpan}</td>
+      <td style="font-size:11px;font-weight:500;">${priceStr}</td>
+      <td style="font-size:12px;font-weight:500;" class="${ppCls}">${ppStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCharts(){
+  const data = filteredData().slice().sort((a,b)=>b.tops-a.tops);
+  const maxT = data[0]?.tops||1;
+  document.getElementById('chart-bars').innerHTML = data.map(m=>{
+    const w = Math.max(2, Math.round(Math.log10(m.tops+1)/Math.log10(maxT+1)*100*4.5));
+    return `<div class="chart-row"><div class="chart-label">${m.name}</div><div class="chart-bar" style="width:${Math.max(2,w)}px;background:#185FA5"></div><div class="chart-val">${m.topslabel} TOPS</div></div>`;
+  }).join('');
+  const ppData = data.filter(m=>m.price).slice().sort((a,b)=>ppScore(b)-ppScore(a));
+  const maxPP = ppScore(ppData[0])||1;
+  document.getElementById('pp-bars').innerHTML = ppData.map(m=>{
+    const pp = ppScore(m);
+    const w = Math.round(pp/maxPP*520);
+    const c = ppClass(pp);
+    const color = c==='pp-good'?'#1D9E75':c==='pp-mid'?'#BA7517':'#888780';
+    return `<div class="chart-row"><div class="chart-label">${m.name}</div><div class="chart-bar" style="width:${Math.max(2,w)}px;background:${color}"></div><div class="chart-val ${c}">${pp.toFixed(2)}</div></div>`;
+  }).join('');
+}
+
+function setFilter(f, btn){
+  currentFilter=f;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+  renderCharts();
+}
+
+function setView(v, btn){
+  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('table-view').style.display = v==='table'?'':'none';
+  document.getElementById('chart-view').classList.toggle('visible',v==='chart');
+}
+
+renderTable();
+renderCharts();
+</script>
